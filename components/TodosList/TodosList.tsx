@@ -1,21 +1,23 @@
 "use client"
 
-import React, { useEffect, useId, useState} from 'react';
+import React, { useEffect} from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchTodos } from '../../lib/todosSlice';
-import TodosListItem from './TodosListItem/TodosListItem';
+import {fetchTodos} from '@lib/todosSlice'
+import TodosListItem from '@components/TodosList/TodosListItem/TodosListItem';
 import { useRouter } from 'next/router';
+import { TypeTodo } from '@lib/types/types';
+import { filtersReset } from '@lib/filtersSlice';
 // import './todosList.scss'
 // import '../TodosList/todosList.scss'
 import Link from 'next/link'
 
-const TodosList = () => {
+const TodosList: React.FC = () => {
   const dispatch = useDispatch();
   const router = useRouter();
 
 
   const todosListAll = useSelector((state) => state.todos.todos)
-  const activeFilter = useSelector((state) => state.filters.selectedFilters)
+  let activeFilter = useSelector((state) => state.filters.selectedFilters)
   const completedFilter = useSelector((state) => state.filters.filterCompleted);
 
   // let todosArr = [];
@@ -32,12 +34,13 @@ const TodosList = () => {
 
 
   useEffect(() => {
+    dispatch(filtersReset());
     dispatch(fetchTodos());
   }, []);
 
 
-  const checkFilters = (filter, todos) => {
-    let todosArr = [];
+  const checkFilters = (filter: {}[], todos: TypeTodo[]) => {
+    let todosArr: TypeTodo[] = [];
     if (filter === undefined){
       return todos
     }
@@ -63,7 +66,8 @@ const TodosList = () => {
 
   const testingArr = checkFilters(activeFilter, todosListAll)
 
-  const handleNavigateDetail = (id, userId, title) => {
+
+  const handleNavigateDetail = (id: number, userId: number, title: string) => {
     router.push({
       pathname: `/todos/todos-${id}`,
       // pathname: `./task-${id}`,
@@ -71,7 +75,7 @@ const TodosList = () => {
     })
   }
 
-  const renderItems = (arr) => {
+  const renderItems = (arr: TypeTodo[]) => {
     if (arr === undefined) return
     if (arr.length === 0){
       return

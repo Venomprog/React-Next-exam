@@ -1,6 +1,6 @@
 import type { NextPage } from 'next'
-import TodosList from '../components/TodosList/TodosList'
-import FiltersList from '../components/FilterList/FiltersList'
+import FiltersList from '@components/FilterList/FiltersList'
+import TodosList from '@components/TodosList/TodosList'
 
 const Home: NextPage = () => {
   return (

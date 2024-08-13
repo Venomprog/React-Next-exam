@@ -1,7 +1,22 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import {useRequest} from './useRequest'
+import {IStateFilters} from '@lib/types/initialState'
+import axios, {isCancel, AxiosError} from 'axios';
+import * as AxiosLogger from 'axios-logger';
+import { TypeTodo } from './types/types';
 
-const initialState = {
+console.log(axios.isCancel('something'));
+const instance = axios.create();
+instance.interceptors.request.use(AxiosLogger.requestLogger);
+instance.interceptors.response.use(AxiosLogger.responseLogger);
+
+
+type GetTodosResponse = {
+  data: TypeTodo[];
+};
+
+
+const initialState: IStateFilters = {
   filters: [
     1,
     2,
@@ -13,27 +28,31 @@ const initialState = {
   filterCompleted: false
 }
 
-export const fetchFilters = createAsyncThunk(
+export const fetchFilters = createAsyncThunk<TypeTodo[], void, { rejectValue: { error: string } }>(
   'filters/fetchFilters',
-  () => {
-    const {request} = useRequest();
-    return request("https://jsonplaceholder.typicode.com/todos")
+  async () => {
+    // const {request} = useRequest();
+    // return request("https://jsonplaceholder.typicode.com/todos")
+
+
+    try {
+      const response = await instance.get('https://jsonplaceholder.typicode.com/todos');
+
+      console.log('response', new Date)
+      console.log(response)
+      return response.data
+    } catch (error) {
+      console.error(error);
+    }
   }
 );
-// export const fetchAllTodos = createAsyncThunk(
-//   'filters/fetchFilters',
-//   () => {
-//     const {request} = useRequest();
-//     return request("https://jsonplaceholder.typicode.com/todos")
-//   }
-// );
 
 const filtersSlice = createSlice({
   name: 'filters',
   initialState,
   reducers: {
     filtersChanging: (state, action) => {
-      state.activeFilter = action.payload
+      // state.activeFilter = action.payload
     },
     filterCompletedChanging : (state, action) => {
       state.filterCompleted = action.payload
@@ -46,6 +65,10 @@ const filtersSlice = createSlice({
     selectedFiltersRemove: (state, action) => {
       if (action.payload === '') return
       state.selectedFilters = state.selectedFilters.filter(item => item !== action.payload)
+    },
+    filtersReset: (state, action) => {
+      state.selectedFilters = []
+      state.filterCompleted = false
     },
 
     filtersFetching: (state, action) => {
@@ -72,5 +95,6 @@ export const {
   filtersFetching,
   selectedFiltersChanging,
   selectedFiltersRemove,
-  filterCompletedChanging
+  filterCompletedChanging,
+  filtersReset
 } = actions

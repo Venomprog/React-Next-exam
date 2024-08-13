@@ -1,6 +1,13 @@
 import React from 'react';
 
-const TodosListItem = (props) => {
+type TodosListItemProps = {
+  key: number,
+  userId: number,
+  title: string,
+  completed: boolean,
+}
+
+const TodosListItem: React.FC<TodosListItemProps> = (props) => {
 
   const {userId, title, completed} = props;
   

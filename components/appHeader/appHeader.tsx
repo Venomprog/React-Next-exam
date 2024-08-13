@@ -1,6 +1,6 @@
 import Link from "next/link"
 
-const AppHeader = () => {
+const AppHeader: React.FC = () => {
 
 
   return (

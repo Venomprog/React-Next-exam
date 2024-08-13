@@ -2,20 +2,24 @@
 
 import React from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { filtersChanging, fetchFilters, selectedFiltersChanging, selectedFiltersRemove, filterCompletedChanging} from '../../lib/filtersSlice';
+import { filtersChanging, fetchFilters, selectedFiltersChanging, selectedFiltersRemove, filterCompletedChanging} from '@lib/filtersSlice';
 import { useEffect } from 'react';
-// import { fetchFilters, selectedFiltersChanging, selectedFiltersRemove } from '../../../redux/slices/filtersSlice';
+import { TypeTodo } from '@lib/types/types';
 
-const FiltersList = () => {
+const FiltersList: React.FC = () => {
+  type checkedFilter = {
+    filterItem: number | string
+  }
+
   const filters = useSelector(state => state.filters.filters);
   const dispatch = useDispatch();
-  let checkedFilters = [];
+  let checkedFilters: checkedFilter[] = [];
 
   useEffect(() => {
     dispatch(fetchFilters());
   }, []);
 
-  const filterTodos = (filter) => {
+  const filterTodos = (filter: checkedFilter) => {
     dispatch(filtersChanging(filter))
   }
 
@@ -42,7 +46,7 @@ const FiltersList = () => {
     // dispatch(selectedFiltersChanging(checkedFilters));
   }
 
-  const renderFilters = (arr) => {
+  const renderFilters = (arr: TypeTodo[]) => {
     if (arr.length === 0){
       return
     }

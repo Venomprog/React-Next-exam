@@ -1,40 +1,81 @@
-import type { InferGetServerSidePropsType, GetServerSideProps, GetStaticProps } from 'next'
-import { useEffect } from 'react';
+import type { InferGetServerSidePropsType, GetServerSideProps, GetStaticProps, GetStaticPaths } from 'next'
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { IUser } from '@lib/types/types';
 
- 
-export const getServerSideProps = (async (ctx : any) => {
-  var userId = ctx.query.userId;
-  const title = ctx.query.title;
-  const id = ctx.query.id
+import { useRouter } from 'next/router';
 
-  const res = await fetch("https://jsonplaceholder.typicode.com/users/" + userId);
+
+
+
+export const getStaticPaths: GetStaticPaths = async () =>{
+  const paths: any[] = []
+
+  return ({
+    paths,
+    fallback: 'blocking'
+  })
+}
+
+export const getStaticProps: GetStaticProps   = (async (ctx : any) => {
+
+  // const res = await fetch("https://jsonplaceholder.typicode.com/users/" + userId);
   const resPosts = await fetch("https://jsonplaceholder.typicode.com/posts");
 
-  const data = await res.json()
+  // const data = await res.json()
   const dataPosts = await resPosts.json()
   // Fetch data from external API
 
   // Pass data to the page via props
-  return { props: { data, title, dataPosts, id } }
+  return { props: { dataPosts}, revalidate: 15 }
 }) 
 
 
 
 
-const Page = ({data, title, dataPosts, id}) => {  
+const Page = ({dataPosts}) => {  
+
+  const router = useRouter()
+
+  interface IUserRouterQuery {
+    id?: number,
+    userId?: number,
+    title?: string
+  }
+
+  const {id, userId, title}: IUserRouterQuery = router.query
+
+  const [user, setUser] = useState<IUser>()
+
+  useEffect( () => {
+
+    const fetchUser = async () => {
+
+
+      const res = await fetch("https://jsonplaceholder.typicode.com/users/" + userId);
+      const data = await res.json();
+
+      setUser(data)
+    }
+
+    fetchUser();
+  }, [])
+
 
   const todosId = id
   function renderPosts (arr) {
 
-  const newArr = arr.slice(0, 5);
+    const filterUserArr = arr.filter(item => item.userId == userId);
+
+  const newArr = filterUserArr.slice(0, 5);
 
     return newArr.map(({title, id}) => {
       return (
         <Link key={id}  href={{
           pathname: `/todos/todos-${todosId}/post-${id}`,
           query: {
-            title
+            title,
+            id
           }
         }}>
           <div  className='detail-page__posts-item'>
@@ -55,7 +96,7 @@ const Page = ({data, title, dataPosts, id}) => {
         <div className='detail-page'>
           <div className='detail-page__user'>
             <div className='detail-page__user-name'>
-              User name: {data.name}
+              User name: {user?.name}
             </div>
             <div className='detail-page__user-task'>
               Task name: {title}
